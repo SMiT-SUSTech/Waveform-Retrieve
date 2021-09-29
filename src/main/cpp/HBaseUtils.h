@@ -40,8 +40,8 @@ public:
         }
     }
 
+    void create_table(const char* table_name, const char* column_family);
     void put(const char* table_name, const char* row_key, long long start_location, char* data);
-
 };
 
 #endif //CPP_HBASEUTILS_H

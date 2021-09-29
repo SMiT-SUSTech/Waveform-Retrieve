@@ -5,12 +5,16 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <vector>
 #include <algorithm>
+#include <sstream>
 #include "WaveSingalStruct.h"
 
 class SQLiteUtils {
     char* table_name = nullptr;
     sqlite3 *db = nullptr;
+    void ddl_exec(const std::string &sql);
 public:
     SQLiteUtils() = default;
     SQLiteUtils(const char* name) {
@@ -33,22 +37,16 @@ public:
             sqlite3_close(db);
         }
     }
-    static int sqlite_callback(void *unused, int count, char **data, char **columns) {
-        int idx;
 
-        printf("There are %d column(s)\n", count);
-
-        for (idx = 0; idx < count; idx++) {
-            printf("The data in column \"%s\" is: %s\n", columns[idx], data[idx]);
-        }
-
-        printf("\n");
-
-        return 0;
-    }
     sqlite3* open_table();
+//    void query_exec(const std::string &sql);
+    void create_sampleinfo_table();
     void create_wavesignal_table();
-    void insert_wavaesignal(WaveSingal wave_singal);
+    void insert_sampleinfo(const std::string &sample_name, const int &length);
+    SampleInfo select_sampleinfo(const std::string &sample_name);
+    void insert_wavesignal(const std::string &sample_name, const WaveSingal &wave_singal);
+    void batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSingal> &singal_list);
+//    WaveSingal select_wavesignal(const std::string );
     void get_signal_hbase_info(const char* signal_name);
 };
 
