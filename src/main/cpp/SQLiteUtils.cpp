@@ -15,6 +15,31 @@ sqlite3* SQLiteUtils::open_table() {
     return db;
 }
 
+bool SQLiteUtils::is_table_exist(const std::string &kTableName) {
+    std::ostringstream sql;
+    sql << "SELECT count(*) FROM sqlite_master WHERE type='table' and NAME='" << kTableName << "';";
+    sqlite3_stmt* stmt0 = NULL;
+    if (sqlite3_prepare_v2(db, sql.str().c_str(), strlen(sql.str().c_str()), &stmt0, NULL) != SQLITE_OK) {
+        if (stmt0) {
+            sqlite3_finalize(stmt0);
+        }
+        sqlite3_close(db);
+        fprintf(stderr, "Failed to prepare_v2 the table: %s, error: %s\n", kTableName.c_str(),
+                sqlite3_errmsg(db));
+        exit(0);
+    }
+    int r = sqlite3_step(stmt0);
+    if (r == SQLITE_DONE) {
+        return false;
+    } else if (r == SQLITE_ROW) {
+        return true;
+    } else {
+        fprintf(stderr, "Failed to determine the existence of the table: %s, error: %s\n", kTableName.c_str(),
+                sqlite3_errmsg(db));
+        exit(0);
+    }
+}
+
 void SQLiteUtils::ddl_exec(const std::string &sql) {
     int rc;
     char *zErrMsg = nullptr;
@@ -30,20 +55,26 @@ void SQLiteUtils::ddl_exec(const std::string &sql) {
 }
 
 void SQLiteUtils::create_sampleinfo_table() {
+    if (is_table_exist("SampleInfo")) {
+        return;
+    }
     const std::string sql = "CREATE TABLE  SampleInfo(" \
-                            "SampleID      INT(32)           PRIMARY KEY AUTOINCREMENT  NOT NULL," \
-                            "SampleName    VARCHAR(1024)                                NOU NULL," \
-                            "BlockLength   INT(64) UNSIGNED                             NOT NULL);";
+                            "SampleID      INTEGER          PRIMARY KEY AUTOINCREMENT  NOT NULL," \
+                            "SampleName    VARCHAR(1024)                               NOT NULL," \
+                            "BlockLength   INT(64)                                     NOT NULL);";
     SQLiteUtils::ddl_exec(sql);
 }
 
 void SQLiteUtils::create_wavesignal_table() {
+    if (is_table_exist("WaveSingal")) {
+        return;
+    }
     const std::string sql = "CREATE TABLE WaveSignal(" \
-                            "SID         INT(64)           PRIMARY KEY AUTOINCREMENT  NOT NULL," \
-                            "SampleID    INT(32)           PRIMARY KEY                NOT NULL," \
-                            "SignalName  VARCHAR(8192)                                NOT NULL," \
-                            "FID         INT(16) UNSIGNED                             NOT NULL," \
-                            "Pos         INT(16) UNSIGNED                             NOT NULL);";
+                            "SID         INTEGER         PRIMARY KEY AUTOINCREMENT  NOT NULL," \
+                            "SampleID    INT(32)         UNIQUE INDEX               NOT NULL," \
+                            "SignalName  VARCHAR(8192)                              NOT NULL," \
+                            "FID         INT(16)                                    NOT NULL," \
+                            "Pos         INT(16)                                    NOT NULL);";
     SQLiteUtils::ddl_exec(sql);
 }
 
