@@ -1,4 +1,3 @@
-#include <iostream>
 #include "SQLiteUtils.h"
 #include "HBaseUtils.h"
 #include "WaveSingalStruct.h"
@@ -26,16 +25,22 @@ int main() {
     sqlite_utils.batch_insert_wavesignal(sample_info.sample_name, singal_list);
 
     // 6. 初始化HBaseUtils
-    HBaseUtils hbase_utils("HBaseUtils"); //HBaseUtils是java中操作HBase的类名,HBaseUtils
+    HBaseUtils hbase_utils("JNIDemo"); //HBaseUtils是java中操作HBase的类名,HBaseUtils
+
+    std::cout << "init ok" << std::endl;
 
     hbase_utils.create_table(sample_info.sample_name.c_str(), "WaveData"); // 第一个参数为HBase中的表名,第二个参数是列簇名
 
-    // 7. 将波形数据存入HBase
-    for (const auto &signal: singal_list) {
-        // smit应该在这里有一些解析数据帧等的代码
-        hbase_utils.put(sample_info.sample_name.c_str(), signal.singal_name, start_location, data);
-    }
+    std::cout << "create table ok" << std::endl;
 
+    // 7. 将波形数据存入HBase
+//    for (const auto &signal: singal_list) {
+//        // smit应该在这里有一些解析数据帧等的代码
+//        hbase_utils.put(sample_info.sample_name.c_str(), signal.singal_name, start_location, data);
+//   }
+    hbase_utils.put("testTablename","testRowkey","testFamily","testColumn",0,"testData");
+
+    std::cout << "put ok" << std::endl;
 
     return 0;
 }
