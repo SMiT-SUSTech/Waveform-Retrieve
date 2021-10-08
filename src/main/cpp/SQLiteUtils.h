@@ -39,7 +39,8 @@ public:
     }
 
     sqlite3* open_table();
-//    void query_exec(const std::string &sql);
+//    void query_exec(const std::string &sql)qli
+    bool is_table_exist(const std::string &kTableName);
     void create_sampleinfo_table();
     void create_wavesignal_table();
     void insert_sampleinfo(const std::string &sample_name, const int &length);
