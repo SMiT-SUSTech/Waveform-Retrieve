@@ -36,13 +36,18 @@ public:
             exit(0);
         }
 
-        cls = env->FindClass("JNIDemo");
+        cls = env->FindClass(class_name.c_str());
         if(cls == nullptr) {
             fprintf(stderr, "FindClass error!\n");
             exit(0);
         }
+        std::cout << "0000" << std::endl;
+//        jobj=create_HBaseUtils();
+//        std::cout << "1111" << std::endl;
     }
 
+    void create_HBaseUtils();
+    void hello();
     void create_table(const char* table_name, const char* column_family);
     void put(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location,const char* data);
 };
@@ -59,6 +64,8 @@ extern "C" {
  * Method:    callbackHBaseUtils
  * Signature: ()V
  */
+JNIEXPORT void JNICALL Java_HBaseUtils_callbackhello
+        (JNIEnv * env);
 JNIEXPORT void JNICALL Java_HBaseUtils_callbackHBaseUtils
         (JNIEnv *, jobject);
 

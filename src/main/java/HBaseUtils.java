@@ -9,6 +9,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -17,9 +18,19 @@ import java.util.List;
 public class HBaseUtils {
     private static final Logger logger = LoggerFactory.getLogger(HBaseUtils.class);
     private static Configuration config;
-    private static Connection connection;
+    private static Connection conn;
+    public native void callbackhello();
+    public native void callbackHBaseUtils();
+    public native void callbackCreateTable(String tName, String fName);
+    public native void callbackPut(String tableName, String rowKey, String family, String column,
+                                   long startLocation, String data);
+    public native void callbackGet(String tableName, String rowKey, String family, String column,
+                                   long ts, String data);
 
-    public HBaseUtils() {
+    public HBaseUtils(){};
+
+    public HBaseUtils(int a) {
+        System.out.println(a);
         config = HBaseConfiguration.create();
         try {
             config.addResource(new Path(ClassLoader.getSystemResource("hbase-site.xml").toURI()));
@@ -34,13 +45,30 @@ public class HBaseUtils {
         }
         logger.info("Add config: core-site.xml");
 
-        try (Connection connection = ConnectionFactory.createConnection(config)) {
+        try {
+            conn = ConnectionFactory.createConnection(config);
             logger.info("Build Connection");
-            System.out.println("Build Connection");
-            System.out.println(connection);
+            System.out.println("new Build Connection");
+            System.out.println(conn);
         } catch (IOException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (IOException er) {
+                    er.printStackTrace();
+                }
+            }
         }
+//        finally {
+//            if (connection != null) {
+//                try {
+//                    connection.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
     }
 
     /**
@@ -65,47 +93,91 @@ public class HBaseUtils {
         return config;
     }
 
-    /**
-     * 建立连接
-     *
-     * @return Connection
-     */
-    public static Connection getConnection() {
-        //获取配置
-        Configuration config = getConfiguration();
-
-        try (Connection connection = ConnectionFactory.createConnection(config)) {
-            logger.info("Build Connection");
-            System.out.println("Build Connection");
-            System.out.println(connection);
-            return connection;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public static void hello() {
+        System.out.println("hello, world!!");
     }
 
-    public static boolean isExists(String tableName) {
-        boolean tableExists = false;
-        try (Admin admin = HBaseConfig.getConnection().getAdmin()) {
-            tableExists = admin.tableExists(TableName.valueOf(tableName));
+    public static void createTable(String tName, String fName) {
+        Configuration conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("hbase.zookeeper.quorum", "master");
+//        try {
+//            conf.addResource(new Path(ClassLoader.getSystemResource("hbase-site.xml").toURI()));
+//        } catch (URISyntaxException e) {
+//            System.out.println(e);
+//            e.printStackTrace();
+//        }
+////        logger.info("Add config: hbase-site.xml");
+//        System.out.println("Add config: hbase-site.xml");
+//        try {
+//            conf.addResource(new Path(ClassLoader.getSystemResource("core-site.xml").toURI()));
+//        } catch (URISyntaxException e) {
+//            System.out.println(e);
+//            e.printStackTrace();
+//        }
+////        logger.info("Add config: core-site.xml");
+//        System.out.println("Add config: core-site.xml");
+        System.out.println("config: "+conf);
+
+        Connection con = null;
+        System.out.println("conn null");
+        try {
+            System.out.println("in try conn null");
+            con = ConnectionFactory.createConnection(conf);
+//            logger.info("Build Connection");
+            System.out.println("new Build Connection");
+            System.out.println(con);
         } catch (IOException e) {
+            System.out.println("conn catch");
+            e.printStackTrace();
+            System.out.println(e);
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (IOException er) {
+                    er.printStackTrace();
+                }
+            }
+        }
+
+
+        System.out.println("java: start create table");
+        System.out.println("java: createTable con:"+con);
+        if (con.isClosed()) {
+            System.out.println("connect is closed");
+        }
+        try (Admin admin = con.getAdmin()) {
+            System.out.println("in try");
+            TableName tableName = TableName.valueOf(tName);
+            System.out.println("Table name: " + tableName.toString());
+            if (admin.tableExists(tableName)) {
+                System.out.println("in if");
+//                logger.warn("table:{} exists!", tableName.getName());
+                System.out.println("table has existed");
+            } else {
+                System.out.println("in else");
+                TableDescriptorBuilder builder = TableDescriptorBuilder.newBuilder(tableName);
+                ColumnFamilyDescriptorBuilder colFamilyDesc = ColumnFamilyDescriptorBuilder.newBuilder(Bytes.toBytes(fName));
+                ColumnFamilyDescriptor familyDescriptor = colFamilyDesc.build();
+                builder.setColumnFamily(familyDescriptor);
+                admin.createTable(builder.build());
+                System.out.println("create table success");
+            }
+        } catch (IOException e) {
+            System.out.println("error: "+e);
             e.printStackTrace();
         }
-        return tableExists;
     }
 
     /**
      * 创建表
      *
-     * @param connection
      * @param tableName
      * @param columnFamilies
      * @throws IOException
      */
     public static void createTable(TableName tableName, String... columnFamilies) {
-        try (Admin admin = getConnection().getAdmin()) {
+        try (HBaseAdmin admin = (HBaseAdmin) conn.getAdmin()) {
             if (admin.tableExists(tableName)) {
                 logger.warn("table:{} exists!", tableName.getName());
             } else {
@@ -147,10 +219,10 @@ public class HBaseUtils {
     }
 
     public static void put(String tableName, String rowKey, String family, String column,
-                           long ts, String data) {
-        try (Table table = getConnection().getTable(TableName.valueOf(tableName))) {
-            Put put = new Put(Bytes.toBytes(tableName));
-            put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), ts, Bytes.toBytes(data));
+                           long startLocation, String data) {
+        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+            Put put = new Put(Bytes.toBytes(rowKey));
+            put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
             table.put(put);
         } catch (IOException e) {
             e.printStackTrace();
@@ -159,10 +231,10 @@ public class HBaseUtils {
 
 
     public static void put(Connection connection, String tableName, String rowKey, String family, String column,
-                           long ts, String data) {
+                           long startLocation, String data) {
         try (Table table = connection.getTable(TableName.valueOf(tableName))) {
-            Put put = new Put(Bytes.toBytes(tableName));
-            put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), ts, Bytes.toBytes(data));
+            Put put = new Put(Bytes.toBytes(rowKey));
+            put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
             table.put(put);
         } catch (IOException e) {
             e.printStackTrace();
@@ -172,7 +244,7 @@ public class HBaseUtils {
     public static List<String> get(String tableName, String rowKey, String family, String column,
                                    long ts, String data) {
         List<String> list = new ArrayList<>();
-        try (Table table = getConnection().getTable(TableName.valueOf(tableName))) {
+        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
             Get get = new Get(Bytes.toBytes(rowKey));
             get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
             get.setTimestamp(ts);
@@ -212,7 +284,7 @@ public class HBaseUtils {
     public static List<String> get(String tableName, String rowKey, String family, String column,
                                    long minTs, long maxTs, String data) {
         List<String> list = new ArrayList<>();
-        try (Table table = getConnection().getTable(TableName.valueOf(tableName))) {
+        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
             Get get = new Get(Bytes.toBytes(rowKey));
             get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
             get.setTimeRange(minTs, maxTs);
@@ -251,7 +323,7 @@ public class HBaseUtils {
     }
 
     public static void deleteTable(String tableName) {
-        try (Admin admin = getConnection().getAdmin()) {
+        try (Admin admin = conn.getAdmin()) {
             if (admin.tableExists(TableName.valueOf(tableName))) {
                 admin.disableTable(TableName.valueOf(tableName));
                 admin.deleteTable(TableName.valueOf(tableName));
@@ -277,7 +349,10 @@ public class HBaseUtils {
         System.out.println(output);
     }
 
-//    public static void main(String[] args) {
-//        HBaseConfig.getConnection();
-//    }
+    public static void main(String[] args) {
+        HBaseUtils hbaseUtils = new HBaseUtils();
+        hbaseUtils.hello();
+        hbaseUtils.createTable("test_table_b", "col");
+
+    }
 }
