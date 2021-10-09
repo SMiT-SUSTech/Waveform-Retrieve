@@ -25,13 +25,15 @@ int main() {
     sqlite_utils.batch_insert_wavesignal(sample_info.sample_name, singal_list);
 
     // 6. 初始化HBaseUtils
-    HBaseUtils hbase_utils("JNIDemo"); //HBaseUtils是java中操作HBase的类名,HBaseUtils
+    HBaseUtils hbase_utils("HBaseUtils"); //HBaseUtils是java中操作HBase的类名,HBaseUtils
 
+    hbase_utils.hello();
     std::cout << "init ok" << std::endl;
+
 
     hbase_utils.create_table(sample_info.sample_name.c_str(), "WaveData"); // 第一个参数为HBase中的表名,第二个参数是列簇名
 
-    std::cout << "create table ok" << std::endl;
+    std::cout << "create HBase table ok" << std::endl;
 
     // 7. 将波形数据存入HBase
 //    for (const auto &signal: singal_list) {
