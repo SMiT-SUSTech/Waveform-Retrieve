@@ -120,15 +120,12 @@ public class HBaseUtils {
         System.out.println("config: "+conf);
 
         Connection con = null;
-        System.out.println("conn null");
         try {
-            System.out.println("in try conn null");
             con = ConnectionFactory.createConnection(conf);
 //            logger.info("Build Connection");
             System.out.println("new Build Connection");
             System.out.println(con);
         } catch (IOException e) {
-            System.out.println("conn catch");
             e.printStackTrace();
             System.out.println(e);
             if (con != null) {
@@ -220,7 +217,36 @@ public class HBaseUtils {
 
     public static void put(String tableName, String rowKey, String family, String column,
                            long startLocation, String data) {
-        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+        Configuration conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("hbase.zookeeper.quorum", "master");
+        System.out.println("config: "+conf);
+
+        Connection con = null;
+        try {
+            con = ConnectionFactory.createConnection(conf);
+//            logger.info("Build Connection");
+            System.out.println("new Build Connection");
+            System.out.println(con);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(e);
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (IOException er) {
+                    er.printStackTrace();
+                }
+            }
+        }
+
+
+        System.out.println("java: start put");
+        System.out.println("java: put con:"+con);
+        if (con.isClosed()) {
+            System.out.println("connect is closed");
+        }
+        try (Table table = con.getTable(TableName.valueOf(tableName))) {
             Put put = new Put(Bytes.toBytes(rowKey));
             put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
             table.put(put);
