@@ -9,6 +9,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -119,12 +120,15 @@ public class HBaseUtils {
         System.out.println("config: "+conf);
 
         Connection con = null;
+        System.out.println("conn null");
         try {
+            System.out.println("in try conn null");
             con = ConnectionFactory.createConnection(conf);
 //            logger.info("Build Connection");
             System.out.println("new Build Connection");
             System.out.println(con);
         } catch (IOException e) {
+            System.out.println("conn catch");
             e.printStackTrace();
             System.out.println(e);
             if (con != null) {
@@ -216,47 +220,11 @@ public class HBaseUtils {
 
     public static void put(String tableName, String rowKey, String family, String column,
                            long startLocation, String data) {
-        Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.property.clientPort", "2181");
-        conf.set("hbase.zookeeper.quorum", "master");
-        System.out.println("config: "+conf);
-
-        Connection con = null;
-        try {
-            con = ConnectionFactory.createConnection(conf);
-//            logger.info("Build Connection");
-            System.out.println("new Build Connection");
-            System.out.println(con);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println(e);
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (IOException er) {
-                    er.printStackTrace();
-                }
-            }
-        }
-
-
-        System.out.println("java: start put");
-        System.out.println("java: put con:"+con);
-        System.out.println("1 out try: tableName:"+tableName);
-        System.out.println("1 out try: tableName:"+tableName+", rowKey:"+rowKey+", family:"+family+", column:"+column+", data:"+data);
-        if (con.isClosed()) {
-            System.out.println("connect is closed");
-        }
-        System.out.println("2 out try: tableName:"+tableName+", rowKey:"+rowKey+", family:"+family+", column:"+column+", data:"+data);
-        try (Table table = con.getTable(TableName.valueOf(tableName))) {
-            System.out.println("put in try");
+        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
             Put put = new Put(Bytes.toBytes(rowKey));
-            System.out.println("tableName:"+tableName+", rowKey:"+rowKey+", family:"+family+", column:"+column+", data:"+data);
             put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
             table.put(put);
-            System.out.println("put data ok");
         } catch (IOException e) {
-            System.out.println("put data fail");
             e.printStackTrace();
         }
     }
@@ -385,7 +353,6 @@ public class HBaseUtils {
         HBaseUtils hbaseUtils = new HBaseUtils();
         hbaseUtils.hello();
         hbaseUtils.createTable("test_table_b", "col");
-        hbaseUtils.put("test_table_b", "123456", "col", "abc", 12345, "testsetest");
 
     }
 }
