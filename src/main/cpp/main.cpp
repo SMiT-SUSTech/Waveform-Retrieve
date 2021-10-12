@@ -40,7 +40,7 @@ int main() {
 //        // smit应该在这里有一些解析数据帧等的代码
 //        hbase_utils.put(sample_info.sample_name.c_str(), signal.singal_name, start_location, data);
 //   }
-    hbase_utils.put("testTablename","testRowkey","testFamily","testColumn",0,"testData");
+    hbase_utils.put(sample_info.sample_name.c_str(), "testet","WaveData","testColumn",1234,"testData");
 
     std::cout << "put ok" << std::endl;
 
