@@ -100,18 +100,18 @@ JNIEXPORT void JNICALL Java_HBaseUtils_callbackPut
         (JNIEnv * env, jstring jTableName, jstring jRowKey, jstring jFamily, jstring jColumn, jlong jStartLocation, jstring jData){
     jclass jclazz = env->FindClass("HBaseUtils");
     jmethodID jmethodId = env->GetStaticMethodID(jclazz,"put","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V");
-    const char *cTableName = nullptr;
-    const char *cRowKey = nullptr;
-    const char *cFamily = nullptr;
-    const char *cColumn = nullptr;
-    const char *cData = nullptr;
+//    const char *cTableName = nullptr;
+//    const char *cRowKey = nullptr;
+//    const char *cFamily = nullptr;
+//    const char *cColumn = nullptr;
+//    const char *cData = nullptr;
     jboolean isCopy=JNI_TRUE;
-    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
-    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
-    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
-    cColumn = env->GetStringUTFChars(jColumn,&isCopy);
-    cData = env->GetStringUTFChars(jData,&isCopy);
-    env->CallStaticVoidMethod(jclazz,jmethodId,cTableName,cRowKey,cFamily,cColumn,jStartLocation,cData);
+//    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
+//    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
+//    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
+//    cColumn = env->GetStringUTFChars(jColumn,&isCopy);
+//    cData = env->GetStringUTFChars(jData,&isCopy);
+    env->CallStaticVoidMethod(jclazz,jmethodId,jTableName,jRowKey,jFamily,jColumn,jStartLocation,jData);
 }
 
 JNIEXPORT void JNICALL Java_HBaseUtils_callbackGet
