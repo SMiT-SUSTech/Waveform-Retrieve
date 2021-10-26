@@ -35,14 +35,22 @@ int main() {
 
     std::cout << "create HBase table ok" << std::endl;
 
-    // 7. 将波形数据存入HBase
+//     7. 将波形数据存入HBase
 //    for (const auto &signal: singal_list) {
 //        // smit应该在这里有一些解析数据帧等的代码
 //        hbase_utils.put(sample_info.sample_name.c_str(), signal.singal_name, start_location, data);
 //   }
-    hbase_utils.put(sample_info.sample_name.c_str(), "testet","WaveData_test","testColumn",1234,"testData");
+    hbase_utils.put(sample_info.sample_name.c_str(), "testet","WaveData_test","testColumn",1111,"11111111111111111111");
+    hbase_utils.put(sample_info.sample_name.c_str(), "testet","WaveData_test","testColumn",2222,"22222222222222222222");
 
     std::cout << "put ok" << std::endl;
+
+    char* test_data = hbase_utils.get(sample_info.sample_name.c_str(), "testet","WaveData_test","testColumn",1111);
+    std::cout << "get data: " << test_data << std::endl;
+
+    char* test_data_1 = hbase_utils.get(sample_info.sample_name.c_str(), "testet","WaveData_test","testColumn",2222);
+    std::cout << "get data: " << test_data_1 << std::endl;
+
 
     return 0;
 }
