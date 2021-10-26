@@ -45,7 +45,7 @@ public:
             exit(0);
         }
         jobj = create_HBaseUtils();
-        std::cout << "0000" << std::endl;
+//        std::cout << "0000" << std::endl;
 //        jobj=create_HBaseUtils();
 //        std::cout << "1111" << std::endl;
     }
@@ -54,6 +54,7 @@ public:
     void hello();
     void create_table(const char* table_name, const char* column_family);
     void put(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location,const char* data);
+    char* get(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location);
 };
 
 #endif //CPP_HBASEUTILS_H
