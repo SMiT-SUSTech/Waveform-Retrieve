@@ -22,6 +22,7 @@ class HBaseUtils {
     jclass cls;
     jmethodID mid;
     jstring jstr;
+    jobject jobj;
 
     /* 创建java虚拟机
     *	jvm : java虚拟机
@@ -29,7 +30,9 @@ class HBaseUtils {
     */
     jint create_VM(JavaVM **jvm, JNIEnv** env);
 public:
-    HBaseUtils(const std::string class_name) {
+    HBaseUtils() {
+        std::cout << "in cpp hbaseutils init" << std::endl;
+        const std::string class_name = "HBaseUtils";
         ret = create_VM(&jvm, &env);
         if (ret < 0) {
             fprintf(stderr, "create_VM error!\n");
@@ -41,12 +44,13 @@ public:
             fprintf(stderr, "FindClass error!\n");
             exit(0);
         }
+        jobj = create_HBaseUtils();
         std::cout << "0000" << std::endl;
 //        jobj=create_HBaseUtils();
 //        std::cout << "1111" << std::endl;
     }
 
-    void create_HBaseUtils();
+    jobject create_HBaseUtils();
     void hello();
     void create_table(const char* table_name, const char* column_family);
     void put(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location,const char* data);

@@ -14,7 +14,7 @@ int main() {
 
     // 3. 初始化,采样信息
     SampleInfo sample_info;
-    sample_info.sample_name = "first_sample"; // 采样信息标识
+    sample_info.sample_name = "first_sample_test"; // 采样信息标识
     sample_info.block_length = 65536; // 在HBase中存储数据块的长度
 
     // 4. 将 采样信息 写入sqlite
@@ -25,13 +25,13 @@ int main() {
     sqlite_utils.batch_insert_wavesignal(sample_info.sample_name, singal_list);
 
     // 6. 初始化HBaseUtils
-    HBaseUtils hbase_utils("HBaseUtils"); //HBaseUtils是java中操作HBase的类名,HBaseUtils
+    HBaseUtils hbase_utils; //HBaseUtils是java中操作HBase的类名,HBaseUtils
 
-    hbase_utils.hello();
-    std::cout << "init ok" << std::endl;
+//    hbase_utils.hello();
+//    std::cout << "init ok" << std::endl;
 
 
-    hbase_utils.create_table(sample_info.sample_name.c_str(), "WaveData"); // 第一个参数为HBase中的表名,第二个参数是列簇名
+    hbase_utils.create_table(sample_info.sample_name.c_str(), "WaveData_test"); // 第一个参数为HBase中的表名,第二个参数是列簇名
 
     std::cout << "create HBase table ok" << std::endl;
 
@@ -40,7 +40,7 @@ int main() {
 //        // smit应该在这里有一些解析数据帧等的代码
 //        hbase_utils.put(sample_info.sample_name.c_str(), signal.singal_name, start_location, data);
 //   }
-    hbase_utils.put(sample_info.sample_name.c_str(), "testet","WaveData","testColumn",1234,"testData");
+    hbase_utils.put(sample_info.sample_name.c_str(), "testet","WaveData_test","testColumn",1234,"testData");
 
     std::cout << "put ok" << std::endl;
 
