@@ -102,7 +102,7 @@ JNIEXPORT void JNICALL Java_HBaseUtils_callbackPut
 //    const char *cFamily = nullptr;
 //    const char *cColumn = nullptr;
 //    const char *cData = nullptr;
-    jboolean isCopy=JNI_TRUE;
+//    jboolean isCopy=JNI_TRUE;
 //    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
 //    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
 //    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
@@ -112,19 +112,23 @@ JNIEXPORT void JNICALL Java_HBaseUtils_callbackPut
     env->CallObjectMethod(jobj,jmethodId,jTableName,jRowKey,jFamily,jColumn,jStartLocation,jData);
 }
 
-JNIEXPORT void JNICALL Java_HBaseUtils_callbackGet
-        (JNIEnv * env, jstring jTableName, jstring jRowKey, jstring jFamily, jstring jColumn, jlong jTs, jstring jData){
+JNIEXPORT char* JNICALL Java_HBaseUtils_callbackGet
+        (JNIEnv * env, jobject jobj, jstring jTableName, jstring jRowKey, jstring jFamily, jstring jColumn, jlong jTs){
     jclass jclazz = env->FindClass("HBaseUtils");
-    jmethodID jmethodId = env->GetStaticMethodID(jclazz,"get","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V");
-    const char *cTableName =NULL;const char *cRowKey =NULL;const char *cFamily =NULL;const char *cColumn=NULL;const char *cData=NULL;
-    jboolean isCopy=JNI_TRUE;
-    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
-    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
-    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
-    cColumn = env->GetStringUTFChars(jColumn,&isCopy);
-    cData = env->GetStringUTFChars(jData,&isCopy);
+    jmethodID jmethodId = env->GetStaticMethodID(jclazz,"get","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Ljava/lang/String;");
+//    const char *cTableName =NULL;const char *cRowKey =NULL;const char *cFamily =NULL;const char *cColumn=NULL;const char *cData=NULL;
+//    jboolean isCopy=JNI_TRUE;
+//    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
+//    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
+//    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
+//    cColumn = env->GetStringUTFChars(jColumn,&isCopy);
+//    cData = env->GetStringUTFChars(jData,&isCopy);
 //    env->CallStaticVoidMethod(jclazz,jmethodId,cTableName,cRowKey,cFamily,cColumn,jTs,cData);
-    env->CallStaticVoidMethod(jclazz, jmethodId, jTableName, jRowKey, jFamily, jColumn, jTs, jData);
+//    env->CallStaticVoidMethod(jobj, jmethodId, jTableName, jRowKey, jFamily, jColumn, jTs, jData);
+    jstring res = static_cast<jstring>(env->CallObjectMethod(jobj, jmethodId, jTableName, jRowKey, jFamily, jColumn, jTs));
+    char* r = jstringTostring(env, res);
+//    std::cout << "res: " << r << std::endl;
+    return r;
 }
 
 void HBaseUtils::hello() {
@@ -139,7 +143,7 @@ void HBaseUtils::create_table(const char *table_name, const char *column_family)
     jstring jstrT= stoJstring(env,table_name);
     jstring jstrF= stoJstring(env,column_family);
     Java_HBaseUtils_callbackCreateTable(env, jobj,jstrT, jstrF);
-    std::cout << "88888" << std::endl;
+//    std::cout << "88888" << std::endl;
 }
 
 void HBaseUtils::put(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location,const char* data) {
@@ -149,4 +153,14 @@ void HBaseUtils::put(const char* table_name, const char* row_key, const char* fa
     jstring jcolumn= stoJstring(env,column);
     jstring jdata= stoJstring(env,data);
     Java_HBaseUtils_callbackPut(env, jobj, jtable_name, jrow_key,jfamily,jcolumn,(jlong)start_location,jdata);
+}
+
+char* HBaseUtils::get(const char* table_name, const char* row_key, const char* family, const char* column, long long start_location) {
+    jstring jtable_name= stoJstring(env,table_name);
+    jstring jrow_key= stoJstring(env,row_key);
+    jstring jfamily= stoJstring(env,family);
+    jstring jcolumn= stoJstring(env,column);
+//    jstring jdata= stoJstring(env,data);
+    return Java_HBaseUtils_callbackGet(env, jobj, jtable_name, jrow_key,jfamily,jcolumn,(jlong)start_location);
+//    std::cout << "cpp hbase get over" << std::endl;
 }

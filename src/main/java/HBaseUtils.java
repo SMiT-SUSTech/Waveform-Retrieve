@@ -242,7 +242,9 @@ public class HBaseUtils {
 
     public static void put(String tableName, String rowKey, String family, String column,
                            long startLocation, String data) {
+//        System.out.println("in java hbase put");
         try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+//            System.out.println("in java hbase put 555");
             Put put = new Put(Bytes.toBytes(rowKey));
             put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
             table.put(put);
@@ -263,10 +265,11 @@ public class HBaseUtils {
         }
     }
 
-    public static List<String> get(String tableName, String rowKey, String family, String column,
-                                   long ts, String data) {
-        List<String> list = new ArrayList<>();
+    public static String get(String tableName, String rowKey, String family, String column, long ts) {
+        String data = "";
+//        System.out.println("java in get func 555");
         try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+//            System.out.println("java in get func 666");
             Get get = new Get(Bytes.toBytes(rowKey));
             get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
             get.setTimestamp(ts);
@@ -275,13 +278,35 @@ public class HBaseUtils {
             List<Cell> cells = result.listCells();
             for (Cell c : cells) {
                 String sValue = Bytes.toString(CellUtil.cloneValue(c));
-                list.add(sValue);
+                data += sValue;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return list;
+//        System.out.println("java res: " + data);
+        return data;
     }
+
+
+//    public static List<String> get(String tableName, String rowKey, String family, String column,
+//                                   long ts, String data) {
+//        List<String> list = new ArrayList<>();
+//        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+//            Get get = new Get(Bytes.toBytes(rowKey));
+//            get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
+//            get.setTimestamp(ts);
+//
+//            Result result = table.get(get);
+//            List<Cell> cells = result.listCells();
+//            for (Cell c : cells) {
+//                String sValue = Bytes.toString(CellUtil.cloneValue(c));
+//                list.add(sValue);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return list;
+//    }
 
     public static List<String> get(Connection connection, String tableName, String rowKey, String family, String column,
                                    long ts, String data) {
