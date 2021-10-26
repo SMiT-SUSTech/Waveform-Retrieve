@@ -29,6 +29,15 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -49,7 +58,8 @@
             <artifactId>hbase</artifactId>
             <version>2.3.5</version>
             <scope>system</scope>
-            <systemPath>/home/franklin/.m2/repository/org/apache/hbase/hbase-common/2.3.5/hbase-common-2.3.5.jar</systemPath>
+            <systemPath>${basedir}/src/main/resources/hbase-common-2.3.5.jar</systemPath>
+<!--            <systemPath>/home/franklin/.m2/repository/org/apache/hbase/hbase-common/2.3.5/hbase-common-2.3.5.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
