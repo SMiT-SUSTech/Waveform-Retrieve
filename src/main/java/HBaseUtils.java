@@ -27,24 +27,20 @@ public class HBaseUtils {
     public native void callbackGet(String tableName, String rowKey, String family, String column,
                                    long ts, String data);
 
-    public HBaseUtils(){};
+//    public HBaseUtils(){};
 
-    public HBaseUtils(int a) {
-        System.out.println(a);
+    public HBaseUtils() {
+        System.out.println("init HBaseUtis");
         config = HBaseConfiguration.create();
-        try {
-            config.addResource(new Path(ClassLoader.getSystemResource("hbase-site.xml").toURI()));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        logger.info("Add config: hbase-site.xml");
-        try {
-            config.addResource(new Path(ClassLoader.getSystemResource("core-site.xml").toURI()));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        logger.info("Add config: core-site.xml");
-
+        /*
+        默认端口为2181,但需要与hbase-site.xml文件中对应的端口号一致.
+        单机版配置中此参数为2182,请注意修改
+        * */
+        config.set("hbase.zookeeper.property.clientPort", "2181");
+        /*
+        此处需配置好hosts
+        * */
+        config.set("hbase.zookeeper.quorum", "master");
         try {
             conn = ConnectionFactory.createConnection(config);
             logger.info("Build Connection");
@@ -60,6 +56,34 @@ public class HBaseUtils {
                 }
             }
         }
+//        try {
+//            config.addResource(new Path(ClassLoader.getSystemResource("hbase-site.xml").toURI()));
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+//        logger.info("Add config: hbase-site.xml");
+//        try {
+//            config.addResource(new Path(ClassLoader.getSystemResource("core-site.xml").toURI()));
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+//        logger.info("Add config: core-site.xml");
+//
+//        try {
+//            conn = ConnectionFactory.createConnection(config);
+//            logger.info("Build Connection");
+//            System.out.println("new Build Connection");
+//            System.out.println(conn);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (IOException er) {
+//                    er.printStackTrace();
+//                }
+//            }
+//        }
 //        finally {
 //            if (connection != null) {
 //                try {
@@ -98,55 +122,12 @@ public class HBaseUtils {
     }
 
     public static void createTable(String tName, String fName) {
-        Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.property.clientPort", "2181");
-        conf.set("hbase.zookeeper.quorum", "master");
-//        try {
-//            conf.addResource(new Path(ClassLoader.getSystemResource("hbase-site.xml").toURI()));
-//        } catch (URISyntaxException e) {
-//            System.out.println(e);
-//            e.printStackTrace();
-//        }
-////        logger.info("Add config: hbase-site.xml");
-//        System.out.println("Add config: hbase-site.xml");
-//        try {
-//            conf.addResource(new Path(ClassLoader.getSystemResource("core-site.xml").toURI()));
-//        } catch (URISyntaxException e) {
-//            System.out.println(e);
-//            e.printStackTrace();
-//        }
-////        logger.info("Add config: core-site.xml");
-//        System.out.println("Add config: core-site.xml");
-        System.out.println("config: "+conf);
-
-        Connection con = null;
-        System.out.println("conn null");
-        try {
-            System.out.println("in try conn null");
-            con = ConnectionFactory.createConnection(conf);
-//            logger.info("Build Connection");
-            System.out.println("new Build Connection");
-            System.out.println(con);
-        } catch (IOException e) {
-            System.out.println("conn catch");
-            e.printStackTrace();
-            System.out.println(e);
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (IOException er) {
-                    er.printStackTrace();
-                }
-            }
-        }
-
-
-        System.out.println("java: start create table");
-        System.out.println("java: createTable con:"+con);
-        if (con.isClosed()) {
+        System.out.println("java:: create table");
+        System.out.println("java: createTable con:"+conn);
+        if (conn.isClosed()) {
             System.out.println("connect is closed");
         }
-        try (Admin admin = con.getAdmin()) {
+        try (Admin admin = conn.getAdmin()) {
             System.out.println("in try");
             TableName tableName = TableName.valueOf(tName);
             System.out.println("Table name: " + tableName.toString());
@@ -167,6 +148,47 @@ public class HBaseUtils {
             System.out.println("error: "+e);
             e.printStackTrace();
         }
+//        Configuration conf = HBaseConfiguration.create();
+//        conf.set("hbase.zookeeper.property.clientPort", "2181");
+//        conf.set("hbase.zookeeper.quorum", "master");
+//        try {
+//            conf.addResource(new Path(ClassLoader.getSystemResource("hbase-site.xml").toURI()));
+//        } catch (URISyntaxException e) {
+//            System.out.println(e);
+//            e.printStackTrace();
+//        }
+////        logger.info("Add config: hbase-site.xml");
+//        System.out.println("Add config: hbase-site.xml");
+//        try {
+//            conf.addResource(new Path(ClassLoader.getSystemResource("core-site.xml").toURI()));
+//        } catch (URISyntaxException e) {
+//            System.out.println(e);
+//            e.printStackTrace();
+//        }
+////        logger.info("Add config: core-site.xml");
+//        System.out.println("Add config: core-site.xml");
+//        System.out.println("config: "+conf);
+//
+//        Connection con = null;
+//        System.out.println("conn null");
+//        try {
+//            System.out.println("in try conn null");
+//            con = ConnectionFactory.createConnection(conf);
+////            logger.info("Build Connection");
+//            System.out.println("new Build Connection");
+//            System.out.println(con);
+//        } catch (IOException e) {
+//            System.out.println("conn catch");
+//            e.printStackTrace();
+//            System.out.println(e);
+//            if (con != null) {
+//                try {
+//                    con.close();
+//                } catch (IOException er) {
+//                    er.printStackTrace();
+//                }
+//            }
+//        }
     }
 
     /**
