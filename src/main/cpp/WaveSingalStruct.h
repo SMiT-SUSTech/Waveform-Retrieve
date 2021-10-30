@@ -1,8 +1,8 @@
-#ifndef WAVEFORMRETRIEVE_WAVESINGALSTRUCT_H
-#define WAVEFORMRETRIEVE_WAVESINGALSTRUCT_H
+#ifndef WAVEFORMRETRIEVE_WAVESIGNALSTRUCT_H
+#define WAVEFORMRETRIEVE_WAVESIGNALSTRUCT_H
 
-struct WaveSingal {
-    char* singal_name;
+struct WaveSignal {
+    char* signal_name;
     int8_t fid;
     uint16_t pos;
 };
@@ -13,4 +13,4 @@ struct SampleInfo {
     long long block_length;
 };
 
-#endif //WAVEFORMRETRIEVE_WAVESINGALSTRUCT_H
+#endif //WAVEFORMRETRIEVE_WAVESIGNALSTRUCT_H
