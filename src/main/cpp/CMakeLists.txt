@@ -8,7 +8,7 @@ set(JAVA_HOME /opt/jdk1.8.0_301)
 find_package(JNI REQUIRED)
 #include_directories(${JNI_INCLUDE_DIRS})
 
-add_executable(WaveformRetrieve main.cpp SQLiteUtils.cpp SQLiteUtils.h HBaseUtils.cpp HBaseUtils.h WaveSingalStruct.h)
+add_executable(WaveformRetrieve main.cpp SQLiteUtils.cpp SQLiteUtils.h HBaseUtils.cpp HBaseUtils.h WaveSignalStruct.h)
 
 include_directories(
         ${JAVA_HOME}/include
