@@ -66,7 +66,7 @@ void SQLiteUtils::create_sampleinfo_table() {
 }
 
 void SQLiteUtils::create_wavesignal_table() {
-    if (is_table_exist("WaveSingal")) {
+    if (is_table_exist("WaveSignal")) {
         return;
     }
     const std::string sql = "CREATE TABLE WaveSignal(" \
@@ -113,16 +113,16 @@ SampleInfo SQLiteUtils::select_sampleinfo(const std::string &sample_name) {
     return result;
 }
 
-void SQLiteUtils::insert_wavesignal(const std::string &sample_name, const WaveSingal &wave_singal) {
+void SQLiteUtils::insert_wavesignal(const std::string &sample_name, const WaveSignal &wave_signal) {
     SampleInfo sample_info = SQLiteUtils::select_sampleinfo(sample_name) ;
     std::ostringstream insert_sql;
     insert_sql << "INSERT INTO WaveSignal (SampleID, SignalName, FID, Pos) " \
-                  "VALUES (" << sample_info.sample_id << ", '" << sample_name << "', " << wave_singal.fid << \
-                  ", " << wave_singal.pos << ");";
+                  "VALUES (" << sample_info.sample_id << ", '" << sample_name << "', " << wave_signal.fid << \
+                  ", " << wave_signal.pos << ");";
     SQLiteUtils::ddl_exec(insert_sql.str());
 }
 
-void SQLiteUtils::batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSingal> &singal_list) {
+void SQLiteUtils::batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignal> &signal_list) {
     SampleInfo sample_info = SQLiteUtils::select_sampleinfo(sample_name);
     const char *insert_sql = "INSERT INTO WaveSignal (SampleID, SignalName, FID, Pos) VALUES(?, ?, ?, ?);";
     sqlite3_stmt* stmt = nullptr;
@@ -131,11 +131,11 @@ void SQLiteUtils::batch_insert_wavesignal(const std::string &sample_name, const 
     sqlite3_prepare_v2(db, insert_sql, strlen(insert_sql), &stmt, &pzTail);
 
     int col = 1;
-    for (const auto &singal: singal_list) {
+    for (const auto &signal: signal_list) {
         sqlite3_bind_int(stmt, col++, sample_info.sample_id);
-        sqlite3_bind_text(stmt, col++, singal.singal_name, strlen(singal.singal_name), nullptr);
-        sqlite3_bind_int(stmt, col++, singal.fid);
-        sqlite3_bind_int(stmt, col++, singal.pos);
+        sqlite3_bind_text(stmt, col++, signal.signal_name, strlen(signal.signal_name), nullptr);
+        sqlite3_bind_int(stmt, col++, signal.fid);
+        sqlite3_bind_int(stmt, col++, signal.pos);
 
         sqlite3_step(stmt);
         sqlite3_reset(stmt);

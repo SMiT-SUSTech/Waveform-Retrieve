@@ -9,7 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
-#include "WaveSingalStruct.h"
+#include "WaveSignalStruct.h"
 
 class SQLiteUtils {
     char* table_name = nullptr;
@@ -45,9 +45,9 @@ public:
     void create_wavesignal_table();
     void insert_sampleinfo(const std::string &sample_name, const int &length);
     SampleInfo select_sampleinfo(const std::string &sample_name);
-    void insert_wavesignal(const std::string &sample_name, const WaveSingal &wave_singal);
-    void batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSingal> &singal_list);
-//    WaveSingal select_wavesignal(const std::string );
+    void insert_wavesignal(const std::string &sample_name, const WaveSignal &wave_signal);
+    void batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignal> &signal_list);
+//    WaveSignal select_wavesignal(const std::string );
     void get_signal_hbase_info(const char* signal_name);
 };
 
