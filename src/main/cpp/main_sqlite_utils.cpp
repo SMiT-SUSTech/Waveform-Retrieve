@@ -1,5 +1,5 @@
-#include "SQLiteUtils_HZH.h"
-#include "../cpp/WaveSignalStruct.h"
+#include "SQLiteUtils.h"
+#include "WaveSignalStruct.h"
 
 int main() {
     try{
