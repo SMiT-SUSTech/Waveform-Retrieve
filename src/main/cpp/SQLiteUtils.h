@@ -72,9 +72,9 @@ class WavePrj {
         SampleInfo select_sampleinfo(const std::string &sample_name);
 
         void create_wavesignal_table();
-        void insert_wavesignal(const std::string &sample_name, const WaveSignal &wave_signal);
-        void batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignal> &signal_list);
-        std::vector<WaveSignal> select_wavesignal(const std::string &sample_name);
+        void insert_wavesignal(const std::string &sample_name, const WaveSignalInfo &wave_signal);
+        void batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignalInfo> &signal_list);
+        std::vector<WaveSignalInfo> select_wavesignal(const std::string &sample_name);
 };
 
 class WaveUtils {
@@ -90,11 +90,11 @@ class WaveUtils {
         }
         static int32_t SetPrj(std::string PrjName);  // SetPrjDB
         static int32_t SetSample(std::string SampleName , long long &block_length);  // SetWaveDB  // WaveName
-        static int32_t StoreWaveSignal(std::vector<WaveSignal> &SignalList);
+        static int32_t StoreWaveSignal(std::vector<WaveSignalInfo> &SignalList);
 
         static int32_t CheckSampleExists(std::string PrjName , std::string SampleName);  // GetWaveDB
-        static int32_t GetWaveSignalList(std::vector<WaveSignal> &SignalList);
+        static int32_t GetWaveSignalList(std::vector<WaveSignalInfo> &SignalList);
 
 };
 
-#endif //CPP_SQLITEUTILS_HZH_H
+#endif //CPP_SQLITEUTILS_H

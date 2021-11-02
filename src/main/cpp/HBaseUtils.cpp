@@ -83,13 +83,7 @@ JNIEXPORT void JNICALL Java_HBaseUtils_callbackCreateTable
     if (jmethodId != nullptr) {
         std::cout << "jmethodId not null" << std::endl;
     }
-//    const char *cStrT = nullptr;
-//    const char *cStrF = nullptr;
-//    jboolean isCopy=JNI_TRUE;
-//    cStrT = env->GetStringUTFChars(jstrT,&isCopy);
-//    cStrF = env->GetStringUTFChars(jstrF,&isCopy);
-//    std::cout << "get string t:" << cStrT << ", f:" << cStrF << std::endl;
-//    env->CallStaticVoidMethod(jclazz,jmethodId, jstrT,jstrF);
+
     env->CallObjectMethod(jobj,jmethodId,jstrT, jstrF);
 }
 
@@ -97,18 +91,7 @@ JNIEXPORT void JNICALL Java_HBaseUtils_callbackPut
         (JNIEnv * env, jobject jobj, jstring jTableName, jstring jRowKey, jstring jFamily, jstring jColumn, jlong jStartLocation, jstring jData){
     jclass jclazz = env->FindClass("HBaseUtils");
     jmethodID jmethodId = env->GetStaticMethodID(jclazz,"put","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V");
-//    const char *cTableName = nullptr;
-//    const char *cRowKey = nullptr;
-//    const char *cFamily = nullptr;
-//    const char *cColumn = nullptr;
-//    const char *cData = nullptr;
-//    jboolean isCopy=JNI_TRUE;
-//    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
-//    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
-//    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
-//    cColumn = env->GetStringUTFChars(jColumn,&isCopy);
-//    cData = env->GetStringUTFChars(jData,&isCopy);
-//    env->CallStaticVoidMethod(jclazz,jmethodId,jTableName,jRowKey,jFamily,jColumn,jStartLocation,jData);
+
     env->CallObjectMethod(jobj,jmethodId,jTableName,jRowKey,jFamily,jColumn,jStartLocation,jData);
 }
 
@@ -116,34 +99,46 @@ JNIEXPORT char* JNICALL Java_HBaseUtils_callbackGet
         (JNIEnv * env, jobject jobj, jstring jTableName, jstring jRowKey, jstring jFamily, jstring jColumn, jlong jTs){
     jclass jclazz = env->FindClass("HBaseUtils");
     jmethodID jmethodId = env->GetStaticMethodID(jclazz,"get","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Ljava/lang/String;");
-//    const char *cTableName =NULL;const char *cRowKey =NULL;const char *cFamily =NULL;const char *cColumn=NULL;const char *cData=NULL;
-//    jboolean isCopy=JNI_TRUE;
-//    cTableName = env->GetStringUTFChars(jTableName,&isCopy);
-//    cRowKey = env->GetStringUTFChars(jRowKey,&isCopy);
-//    cFamily = env->GetStringUTFChars(jFamily,&isCopy);
-//    cColumn = env->GetStringUTFChars(jColumn,&isCopy);
-//    cData = env->GetStringUTFChars(jData,&isCopy);
-//    env->CallStaticVoidMethod(jclazz,jmethodId,cTableName,cRowKey,cFamily,cColumn,jTs,cData);
-//    env->CallStaticVoidMethod(jobj, jmethodId, jTableName, jRowKey, jFamily, jColumn, jTs, jData);
+
     jstring res = static_cast<jstring>(env->CallObjectMethod(jobj, jmethodId, jTableName, jRowKey, jFamily, jColumn, jTs));
     char* r = jstringTostring(env, res);
-//    std::cout << "res: " << r << std::endl;
     return r;
 }
 
-void HBaseUtils::hello() {
-    Java_HBaseUtils_callbackhello(env);
+JNIEXPORT void JNICALL Java_HBaseUtils_deleteTable(JNIEnv * env, jobject jobj, jstring jTableName) {
+    jclass jclazz = env->FindClass("HBaseUtils");
+    jmethodID jmethodId = env->GetStaticMethodID(jclazz,"deleteTable","(Ljava/lang/String;)V");
+
+    env->CallObjectMethod(jobj,jmethodId,jTableName);
 }
+
+//void HBaseUtils::hello() {
+//    Java_HBaseUtils_callbackhello(env);
+//}
 
 jobject HBaseUtils::create_HBaseUtils() {
     return Java_HBaseUtils_callbackHBaseUtils(env);
+}
+
+void HBaseUtils::create_table(const char *table_name) {
+    jstring jstrT= stoJstring(env,table_name);
+    jstring jstrF= stoJstring(env, "Data");
+    Java_HBaseUtils_callbackCreateTable(env, jobj,jstrT, jstrF);
 }
 
 void HBaseUtils::create_table(const char *table_name, const char *column_family) {
     jstring jstrT= stoJstring(env,table_name);
     jstring jstrF= stoJstring(env,column_family);
     Java_HBaseUtils_callbackCreateTable(env, jobj,jstrT, jstrF);
-//    std::cout << "88888" << std::endl;
+}
+
+void HBaseUtils::put(const char* table_name, const char* row_key, long long start_location,const char* data) {
+    jstring jtable_name= stoJstring(env,table_name);
+    jstring jrow_key= stoJstring(env,row_key);
+    jstring jfamily= stoJstring(env, "Data");
+    jstring jcolumn= stoJstring(env, "WaveData");
+    jstring jdata= stoJstring(env,data);
+    Java_HBaseUtils_callbackPut(env, jobj, jtable_name, jrow_key,jfamily,jcolumn,(jlong)start_location,jdata);
 }
 
 void HBaseUtils::put(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location,const char* data) {
@@ -155,6 +150,16 @@ void HBaseUtils::put(const char* table_name, const char* row_key, const char* fa
     Java_HBaseUtils_callbackPut(env, jobj, jtable_name, jrow_key,jfamily,jcolumn,(jlong)start_location,jdata);
 }
 
+char* HBaseUtils::get(const char* table_name, const char* row_key, long long start_location) {
+    jstring jtable_name= stoJstring(env,table_name);
+    jstring jrow_key= stoJstring(env,row_key);
+    jstring jfamily= stoJstring(env, "Data");
+    jstring jcolumn= stoJstring(env, "WaveData");
+//    jstring jdata= stoJstring(env,data);
+    return Java_HBaseUtils_callbackGet(env, jobj, jtable_name, jrow_key,jfamily,jcolumn,(jlong)start_location);
+//    std::cout << "cpp hbase get over" << std::endl;
+}
+
 char* HBaseUtils::get(const char* table_name, const char* row_key, const char* family, const char* column, long long start_location) {
     jstring jtable_name= stoJstring(env,table_name);
     jstring jrow_key= stoJstring(env,row_key);
@@ -163,4 +168,9 @@ char* HBaseUtils::get(const char* table_name, const char* row_key, const char* f
 //    jstring jdata= stoJstring(env,data);
     return Java_HBaseUtils_callbackGet(env, jobj, jtable_name, jrow_key,jfamily,jcolumn,(jlong)start_location);
 //    std::cout << "cpp hbase get over" << std::endl;
+}
+
+void HBaseUtils::delete_table(const char *table_name) {
+    jstring jtable_name= stoJstring(env,table_name);
+    Java_HBaseUtils_deleteTable(env, jobj, jtable_name);
 }

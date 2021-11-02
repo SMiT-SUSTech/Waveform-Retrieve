@@ -21,7 +21,7 @@ void WavePrj::exec(const char* sql_format_str , ...) {
 /** SMiT domain-specific operations. */
 
 const char* SAMPLE_INFO_TABLE_NAME = "SampleInfo";
-const char* WAVE_SIGNAL_TABLE_NAME = "WaveSignal";
+const char* WAVE_SIGNAL_TABLE_NAME = "WaveSignalInfo";
 
 void WavePrj::create_sampleinfo_table() {
     if(is_table_exist(SAMPLE_INFO_TABLE_NAME)) return;
@@ -82,18 +82,18 @@ void WavePrj::create_wavesignal_table() {
     exec("CREATE INDEX sample_id_index ON %s (SampleID);" , WAVE_SIGNAL_TABLE_NAME);
 }
 
-void WavePrj::insert_wavesignal(const std::string &sample_name, const WaveSignal &wave_signal) {
+void WavePrj::insert_wavesignal(const std::string &sample_name, const WaveSignalInfo &wave_signal) {
     SampleInfo sample_info_obj = select_sampleinfo(sample_name);
 
     // TODO  judge whether signal exist ...
 
-    exec("INSERT INTO WaveSignal (SampleID, SignalName, FID, Pos) VALUES (%d , '%s', %d , %d);" , 
+    exec("INSERT INTO WaveSignalInfo (SampleID, SignalName, FID, Pos) VALUES (%d , '%s', %d , %d);" ,
             sample_info_obj.sample_id , wave_signal.signal_name.c_str(), wave_signal.fid , wave_signal.pos);  // FIXME  the second param should be wave_signal.signal_name, rather than sample_name
 }
 
-void WavePrj::batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignal> &signal_list) {
+void WavePrj::batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignalInfo> &signal_list) {
     SampleInfo sample_info_obj = select_sampleinfo(sample_name);
-        smit::sql::sqlite3_statement compiled = this->db->compileStatement("INSERT INTO WaveSignal (SampleID, SignalName, FID, Pos) VALUES(?, ?, ?, ?);");
+        smit::sql::sqlite3_statement compiled = this->db->compileStatement("INSERT INTO WaveSignalInfo (SampleID, SignalName, FID, Pos) VALUES(?, ?, ?, ?);");
 
         for (const auto &signal: signal_list) {
             compiled.bind(1 , sample_info_obj.sample_id);
@@ -108,7 +108,7 @@ void WavePrj::batch_insert_wavesignal(const std::string &sample_name, const std:
         compiled.finalize();
 }
 
-std::vector<WaveSignal> WavePrj::select_wavesignal(const std::string &sample_name) {
+std::vector<WaveSignalInfo> WavePrj::select_wavesignal(const std::string &sample_name) {
     SampleInfo sample_info_obj = select_sampleinfo(sample_name);
 
     char sql_buf[8192] = {0};
@@ -117,9 +117,9 @@ std::vector<WaveSignal> WavePrj::select_wavesignal(const std::string &sample_nam
 
     smit::sql::sqlite3_query result_1 = this->db->execQuery(sql_buf);
 
-    std::vector<WaveSignal> v;
+    std::vector<WaveSignalInfo> v;
     while(! result_1.eof()) {
-        WaveSignal wave_signal_obj;
+        WaveSignalInfo wave_signal_obj;
 
         wave_signal_obj.signal_name = result_1.getStringField("SignalName");
 
@@ -185,7 +185,7 @@ int32_t WaveUtils::SetSample(std::string SampleName , long long &block_length) {
     return SUCCESS_CODE;
 }
 
-int32_t WaveUtils::StoreWaveSignal(std::vector<WaveSignal> &SignalList) {
+int32_t WaveUtils::StoreWaveSignal(std::vector<WaveSignalInfo> &SignalList) {
     if(current_project == nullptr) {
         std::cout << "Project not set." << std::endl;
         return FAIL_CODE;
@@ -241,7 +241,7 @@ int32_t WaveUtils::CheckSampleExists(std::string PrjName , std::string SampleNam
     return SUCCESS_CODE;
 }
 
-int32_t WaveUtils::GetWaveSignalList(std::vector<WaveSignal> &SignalList) {
+int32_t WaveUtils::GetWaveSignalList(std::vector<WaveSignalInfo> &SignalList) {
     if(current_project == nullptr) {
         std::cout << "Project not set." << std::endl;
         return FAIL_CODE;

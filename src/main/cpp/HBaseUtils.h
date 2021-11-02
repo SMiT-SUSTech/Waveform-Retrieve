@@ -51,10 +51,14 @@ public:
     }
 
     jobject create_HBaseUtils();
-    void hello();
+//    void hello();
+    void create_table(const char* table_name);
     void create_table(const char* table_name, const char* column_family);
+    void put(const char* table_name, const char* row_key, long long start_location,const char* data);
     void put(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location,const char* data);
     char* get(const char* table_name, const char* row_key, const char* family,const char* column,long long start_location);
+    char* get(const char* table_name, const char* row_key, long long start_location);
+    void delete_table(const char* table_name);
 };
 
 #endif //CPP_HBASEUTILS_H
