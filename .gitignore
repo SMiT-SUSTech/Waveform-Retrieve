@@ -1,2 +1,15 @@
 
 .idea/
+cmake-build-debug
+
+src/main/sqlite_20211019/sqlite_20211019/examples/CMakeFiles/
+src/main/sqlite_20211019/sqlite_20211019/examples/cmake_install.cmake
+src/main/sqlite_20211019/sqlite_20211019/examples/CMakeCache.txt
+src/main/sqlite_20211019/sqlite_20211019/examples/Makefile
+
+src/main/2021_1029_using_embedded_sqlite/CMakeFiles/
+src/main/2021_1029_using_embedded_sqlite/cmake_install.cmake
+src/main/2021_1029_using_embedded_sqlite/CMakeCache.txt
+src/main/2021_1029_using_embedded_sqlite/Makefile
+
+*.db
