@@ -4,7 +4,7 @@
 #include <string>
 
 struct WaveSignal {
-    char* signal_name;
+    std::string signal_name;
     __int8_t fid;
     __uint16_t pos;
 };

@@ -4,9 +4,8 @@
 #include "../sqlite_20211019/sqlite_20211019/src/CppSQLite3.h"
 #include "../cpp/WaveSignalStruct.h"
 
-#include <algorithm>  // copy_n
+#include <algorithm>
 #include <iostream>
-// #include <string>  // not necessary, but I don't know why.
 #include <vector>
 
 
@@ -22,12 +21,11 @@ class WaveSysException {
         }
 
         ~WaveSysException() {
-            this->msg = NULL;  // TODO
+            this->msg = nullptr;  // TODO
         }
 
         static const int NO_SAMPLE_INFO_RECORDS = 100;
         static const int SEVERAL_SAMPLE_INFO_RECORDS = 101;
-
         static const int SAMPLE_INFO_RECORD_ALREADY_EXISTS = 102;
 
         const char* errorMessage() {
@@ -37,16 +35,12 @@ class WaveSysException {
 
 
 class WavePrj {
-
-    private:  // FIXME  ok ?? ok. Public or private are both ok except the 5 APIs.
+    private:
         char* db_name = nullptr;  // Each wave project corresponds to a SQLite ".db" file, and the filename will be the same as the project name.
         smit::sql::sqlite3_db* db;
 
     public:
-        // WavePrj() = default;  // TODO  necessary ?? not necessary.
-
         WavePrj(const char* name) {
-
             const size_t name_length = strlen(name);
             this->db_name = new char[name_length + 1]{};
             std::copy_n(name , name_length , this->db_name);
@@ -57,65 +51,43 @@ class WavePrj {
                 exit(1);
             }
 
-            // try {
-                this->db->open(name);  // FIXME  no return code ?? Catch exceptions and exit.
-            // } catch (smit::sql::sqlite3_exception& e) {
-            //     std::cout << e.errorMessage() << std::endl;
-            //     exit(1);
-            // }
+            this->db->open(name);
         }
 
         ~WavePrj() {
             std::cout << "Closing project [" << this->db_name << "]." << std::endl;
-            this->db_name = nullptr;  // FIXME  really release memory ??
-            // try {
-                if(this->db != nullptr) this->db->close();
-            // } catch (smit::sql::sqlite3_exception& e) {
-            //     std::cout << e.errorMessage() << std::endl;
-            //     exit(1);
-            // }
+            delete this->db_name;
+            this->db_name = nullptr;
+            if(this->db != nullptr) this->db->close();
+            delete this->db;
         }
 
-
-
         /** SQLite Accessing Utils. */
-
-        // sqlite3_db* open_db()  // TODO  necessary ?? not necessary.  // FIXME  static ??
-        // void ddl_exec(const std::string &sql);  // "INSERT" are not suitable to be referred to as "data definition language".
-        // void query_exec(const std::string &sql)qli
-
-        bool is_table_exist(const char* k_table_name);  // FIXME  "does", not "is"? No, "is" is a naming standard.  // TODO  what does "k" mean ?? Google uses "k"+CamelCase to indicate a const param.  // TODO  become private ok ?? ok.
+        bool is_table_exist(const char* kTableName);
         void exec(const char* sql_format_str , ...);
 
-
-        
         /** SMiT domain-specific operations. */
-
         void create_sampleinfo_table();
-        void insert_sampleinfo(const std::string &sample_name , const long long &length);  // FIXME block_length not int ??
+        void insert_sampleinfo(const std::string &kSampleName , const long long &kLength);
         SampleInfo select_sampleinfo(const std::string &sample_name);
 
         void create_wavesignal_table();
         void insert_wavesignal(const std::string &sample_name, const WaveSignal &wave_signal);
         void batch_insert_wavesignal(const std::string &sample_name, const std::vector<WaveSignal> &signal_list);
-        // WaveSignal select_wavesignal(const std::string );
         std::vector<WaveSignal> select_wavesignal(const std::string &sample_name);
-
-        // void get_signal_hbase_info(const char* signal_name);  // TODO  necessary ?? not implemented ?? Wait for discussions ...
-        
-
 };
 
 class WaveUtils {
 
     private:
-        static WavePrj* current_project;  // = NULL;
-        static std::string* current_sample;  // = NULL;
-        // FIXME  initial value ?? assign in cpp.
+        static WavePrj* current_project;
+        static std::string current_sample;
 
     public:
         /** SMiT required APIs */
-
+        static void getSampleName() {
+            std::cout << "&&&&&&main sample name: " << current_sample << std::endl;
+        }
         static int32_t SetPrj(std::string PrjName);  // SetPrjDB
         static int32_t SetSample(std::string SampleName , long long &block_length);  // SetWaveDB  // WaveName
         static int32_t StoreWaveSignal(std::vector<WaveSignal> &SignalList);

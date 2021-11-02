@@ -26,6 +26,8 @@ int main() {
         signal_list.push_back({"led_3" , 1 , 40});
         signal_list.push_back({"button_0" , 1 , 50});
         signal_list.push_back({"button_1" , 1 , 60});
+//        std::cout << "main: " << WaveUtils
+        WaveUtils::getSampleName();
         WaveUtils::StoreWaveSignal(signal_list);
 
         std::cout << "\n\n===================================" << std::endl;

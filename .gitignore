@@ -1,5 +1,6 @@
 
 .idea/
+cmake-build-debug
 
 src/main/sqlite_20211019/sqlite_20211019/examples/CMakeFiles/
 src/main/sqlite_20211019/sqlite_20211019/examples/cmake_install.cmake
