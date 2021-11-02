@@ -19,7 +19,7 @@ int main() {
 
         std::cout << "\n\n===================================" << std::endl;
         std::cout << "WaveUtils::StoreWaveSignal" << std::endl;
-        std::vector<WaveSignal> signal_list;
+        std::vector<WaveSignalInfo> signal_list;
         signal_list.push_back({"led_0" , 1 , 10});
         signal_list.push_back({"led_1" , 1 , 20});
         signal_list.push_back({"led_2" , 1 , 30});
@@ -32,10 +32,10 @@ int main() {
 
         std::cout << "\n\n===================================" << std::endl;
         std::cout << "WaveUtils::GetWaveSignalList" << std::endl;
-        std::vector<WaveSignal> signal_list_2;
+        std::vector<WaveSignalInfo> signal_list_2;
         WaveUtils::GetWaveSignalList(signal_list_2);
         for(int i=0 ; i<signal_list_2.size() ; ++i) {
-            WaveSignal sig = signal_list_2[i];
+            WaveSignalInfo sig = signal_list_2[i];
             std::cout << "signal_name=[" << sig.signal_name << "] , fid=" << int(sig.fid) << " , pos=" << sig.pos << std::endl;
             // Note: sig.fid is of __int_8 type, and cannot be printed directly. So it should be cast to int().
         }
