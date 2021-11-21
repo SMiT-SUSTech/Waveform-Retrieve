@@ -1,3 +1,5 @@
+//import com.sun.org.apache.xpath.internal.operations.String;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.Cell;
@@ -19,11 +21,21 @@ public class HBaseUtils {
     private static final Logger logger = LoggerFactory.getLogger(HBaseUtils.class);
     private static Configuration config;
     private static Connection conn;
+    private static List<Put> putList = new ArrayList<>();
+    private static long putBatchSize = 1000;
+    private static long putLastTime;
+    private static List<Get> getList = new ArrayList<>();
+    private static int getBatchSize = 1000;
+
     public native void callbackhello();
+
     public native void callbackHBaseUtils();
+
     public native void callbackCreateTable(String tName, String fName);
+
     public native void callbackPut(String tableName, String rowKey, String family, String column,
                                    long startLocation, String data);
+
     public native void callbackGet(String tableName, String rowKey, String family, String column,
                                    long ts, String data);
 
@@ -123,29 +135,27 @@ public class HBaseUtils {
 
     public static void createTable(String tName, String fName) {
         System.out.println("java:: create table");
-        System.out.println("java: createTable con:"+conn);
+        System.out.println("java: createTable con:" + conn);
         if (conn.isClosed()) {
             System.out.println("connect is closed");
         }
         try (Admin admin = conn.getAdmin()) {
-            System.out.println("in try");
             TableName tableName = TableName.valueOf(tName);
             System.out.println("Table name: " + tableName.toString());
             if (admin.tableExists(tableName)) {
-                System.out.println("in if");
 //                logger.warn("table:{} exists!", tableName.getName());
                 System.out.println("table has existed");
             } else {
-                System.out.println("in else");
                 TableDescriptorBuilder builder = TableDescriptorBuilder.newBuilder(tableName);
                 ColumnFamilyDescriptorBuilder colFamilyDesc = ColumnFamilyDescriptorBuilder.newBuilder(Bytes.toBytes(fName));
                 ColumnFamilyDescriptor familyDescriptor = colFamilyDesc.build();
                 builder.setColumnFamily(familyDescriptor);
+                builder.setMemStoreFlushSize(1024 * 1024 * 1024L);
                 admin.createTable(builder.build());
                 System.out.println("create table success");
             }
         } catch (IOException e) {
-            System.out.println("error: "+e);
+            System.out.println("error: " + e);
             e.printStackTrace();
         }
 //        Configuration conf = HBaseConfiguration.create();
@@ -243,13 +253,27 @@ public class HBaseUtils {
     public static void put(String tableName, String rowKey, String family, String column,
                            long startLocation, String data) {
 //        System.out.println("in java hbase put");
-        try (Table table = conn.getTable(TableName.valueOf(tableName))) {
-//            System.out.println("in java hbase put 555");
-            Put put = new Put(Bytes.toBytes(rowKey));
-            put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
-            table.put(put);
-        } catch (IOException e) {
-            e.printStackTrace();
+        Put put = new Put(Bytes.toBytes(rowKey));
+        put.addColumn(Bytes.toBytes(family), Bytes.toBytes(column), startLocation, Bytes.toBytes(data));
+        putList.add(put);
+        if (putList.size() == putBatchSize) {
+            try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+                table.put(putList);
+                putList.clear();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void putClose(String tableName) {
+        if (!putList.isEmpty()) {
+            try (Table table = conn.getTable(TableName.valueOf(tableName))) {
+                table.put(putList);
+                putList.clear();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -266,25 +290,24 @@ public class HBaseUtils {
     }
 
     public static String get(String tableName, String rowKey, String family, String column, long ts) {
-        String data = "";
+        StringBuilder data = new StringBuilder();
 //        System.out.println("java in get func 555");
         try (Table table = conn.getTable(TableName.valueOf(tableName))) {
 //            System.out.println("java in get func 666");
             Get get = new Get(Bytes.toBytes(rowKey));
             get.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
             get.setTimestamp(ts);
-
             Result result = table.get(get);
             List<Cell> cells = result.listCells();
             for (Cell c : cells) {
                 String sValue = Bytes.toString(CellUtil.cloneValue(c));
-                data += sValue;
+                data.append(sValue);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 //        System.out.println("java res: " + data);
-        return data;
+        return data.toString();
     }
 
 
@@ -392,14 +415,35 @@ public class HBaseUtils {
     }
 
     public static void testAdd(int a, int b) {
-        String output = String.format("a: %d, b: %d, a+b=%d\n", a, b, a+b);
+        String output = String.format("a: %d, b: %d, a+b=%d\n", a, b, a + b);
         System.out.println(output);
     }
 
     public static void main(String[] args) {
         HBaseUtils hbaseUtils = new HBaseUtils();
-        hbaseUtils.hello();
-        hbaseUtils.createTable("test_table_b", "col");
+        hbaseUtils.deleteTable("test_table");
+        hbaseUtils.createTable("test_table", "WaveDataTest");
+        long testTimes = 20000;
+        long DataSize = 2048 * 8;
+        StringBuilder testDataBuilder = new StringBuilder();
+        for (int i = 0; i < DataSize; i++) {
+            testDataBuilder.append("1");
+        }
+        String testData = testDataBuilder.toString();
+        long startTime = System.currentTimeMillis();
+        for (long i = 0; i < testTimes; i++) {
+            hbaseUtils.put("test_table", "test", "WaveDataTest", "testColumn", i, testData);
+        }
+        putClose("test_table");
+        long endTime = System.currentTimeMillis();
+        System.out.println("put:" + (endTime - startTime) + "ns");
 
+        startTime = System.currentTimeMillis();
+        for (long i = 0; i < testTimes; i++) {
+//            System.out.println(i);
+            hbaseUtils.get("test_table", "test", "WaveDataTest", "testColumn", i);
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("get:" + (endTime - startTime) + "ns");
     }
 }
