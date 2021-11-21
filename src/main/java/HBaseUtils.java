@@ -422,20 +422,23 @@ public class HBaseUtils {
     public static void main(String[] args) {
         HBaseUtils hbaseUtils = new HBaseUtils();
         hbaseUtils.deleteTable("test_table");
+        long startTime = System.currentTimeMillis();
         hbaseUtils.createTable("test_table", "WaveDataTest");
-        long testTimes = 20000;
+        long endTime = System.currentTimeMillis();
+        System.out.println("create:" + (endTime - startTime) + "ns");
+        long testTimes = 10000;
         long DataSize = 2048 * 8;
         StringBuilder testDataBuilder = new StringBuilder();
         for (int i = 0; i < DataSize; i++) {
             testDataBuilder.append("1");
         }
         String testData = testDataBuilder.toString();
-        long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
         for (long i = 0; i < testTimes; i++) {
             hbaseUtils.put("test_table", "test", "WaveDataTest", "testColumn", i, testData);
         }
         putClose("test_table");
-        long endTime = System.currentTimeMillis();
+        endTime = System.currentTimeMillis();
         System.out.println("put:" + (endTime - startTime) + "ns");
 
         startTime = System.currentTimeMillis();
